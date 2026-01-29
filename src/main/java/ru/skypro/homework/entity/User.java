@@ -10,6 +10,9 @@ public class User {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
+    @Column(name = "password", nullable = false)
+    private String password;
+
     @Column(name = "email", nullable = false, unique = true)
     private String email;
 
@@ -88,6 +91,14 @@ public class User {
 
     public void setImage(String image) {
         this.image = image;
+    }
+
+    public String getPassword() {
+        return password;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
     }
 
     @Override
