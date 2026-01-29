@@ -11,7 +11,6 @@ import org.springframework.web.multipart.MultipartFile;
  * Provides endpoints for CRUD operations with advertisements and comments
  */
 @RestController
-@CrossOrigin(value = "http://localhost:3000")
 public interface AdsController {
 
     /**
@@ -21,8 +20,10 @@ public interface AdsController {
      * @return Created advertisement
      */
     @PostMapping("/ads")
-    ResponseEntity<Ad> addAd(@RequestPart("properties") CreateOrUpdateAd properties,
-                              @RequestPart("image") MultipartFile image);
+    ResponseEntity<Ad> addAd(
+            @RequestPart("properties") CreateOrUpdateAd properties,
+            @RequestPart("image") MultipartFile image
+    );
 
     /**
      * Add a comment to advertisement
@@ -31,8 +32,10 @@ public interface AdsController {
      * @return Created comment
      */
     @PostMapping("/ads/{id}/comments")
-    ResponseEntity<Comment> addComment(@PathVariable("id") Integer id,
-                                        @RequestBody CreateOrUpdateComment body);
+    ResponseEntity<Comment> addComment(
+            @PathVariable("id") Integer id,
+            @RequestBody CreateOrUpdateComment body
+    );
 
     /**
      * Delete a comment
@@ -41,8 +44,10 @@ public interface AdsController {
      * @return ResponseEntity with status
      */
     @DeleteMapping("/ads/{adId}/comments/{commentId}")
-    ResponseEntity<Void> deleteComment(@PathVariable("adId") Integer adId,
-                                        @PathVariable("commentId") Integer commentId);
+    ResponseEntity<Void> deleteComment(
+            @PathVariable("adId") Integer adId,
+            @PathVariable("commentId") Integer commentId
+    );
 
     /**
      * Get information about advertisement
@@ -89,8 +94,10 @@ public interface AdsController {
      * @return Updated advertisement
      */
     @PatchMapping("/ads/{id}")
-    ResponseEntity<Ad> updateAds(@PathVariable("id") Integer id,
-                                  @RequestBody CreateOrUpdateAd body);
+    ResponseEntity<Ad> updateAds(
+            @PathVariable("id") Integer id,
+            @RequestBody CreateOrUpdateAd body
+    );
 
     /**
      * Update comment
@@ -100,9 +107,11 @@ public interface AdsController {
      * @return Updated comment
      */
     @PatchMapping("/ads/{adId}/comments/{commentId}")
-    ResponseEntity<Comment> updateComment(@PathVariable("adId") Integer adId,
-                                           @PathVariable("commentId") Integer commentId,
-                                           @RequestBody CreateOrUpdateComment body);
+    ResponseEntity<Comment> updateComment(
+            @PathVariable("adId") Integer adId,
+            @PathVariable("commentId") Integer commentId,
+            @RequestBody CreateOrUpdateComment body
+    );
 
     /**
      * Update advertisement image
@@ -111,6 +120,8 @@ public interface AdsController {
      * @return Updated image
      */
     @PatchMapping("/ads/{id}/image")
-    ResponseEntity<Resource> updateImage(@PathVariable("id") Integer id,
-                                          @RequestPart("image") MultipartFile image);
+    ResponseEntity<Resource> updateImage(
+            @PathVariable("id") Integer id,
+            @RequestPart("image") MultipartFile image
+    );
 }

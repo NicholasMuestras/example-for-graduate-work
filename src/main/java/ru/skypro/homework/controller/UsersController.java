@@ -12,7 +12,6 @@ import org.springframework.web.multipart.MultipartFile;
  * Provides endpoints for getting, updating user information and changing password
  */
 @RestController
-@CrossOrigin(value = "http://localhost:3000")
 public interface UsersController {
 
     /**
