@@ -2,6 +2,7 @@ package ru.skypro.homework.service.impl;
 
 import io.swagger.model.*;
 import org.springframework.core.io.Resource;
+import org.springframework.core.io.UrlResource;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -16,6 +17,15 @@ import ru.skypro.homework.repository.AdsRepository;
 import ru.skypro.homework.repository.CommentRepository;
 import ru.skypro.homework.repository.UserRepository;
 import ru.skypro.homework.service.AdsService;
+
+import java.io.IOException;
+import java.net.MalformedURLException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
+import java.util.List;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -55,24 +65,19 @@ public class AdsServiceImpl implements AdsService {
 
     @Override
     public Ad addAd(CreateOrUpdateAd properties, MultipartFile image) {
-        // Получаем текущего пользователя
         User user = getCurrentUser();
         
-        // Создаем новое объявление
         Ads ad = new Ads();
         ad.setTitle(properties.getTitle());
         ad.setPrice(properties.getPrice());
         ad.setDescription(properties.getDescription());
         ad.setAuthor(user);
         
-        // Сохраняем изображение
         String imagePath = saveImage(image);
         ad.setImage(imagePath);
         
-        // Сохраняем объявление в базе данных
         Ads savedAd = adsRepository.save(ad);
         
-        // Конвертируем в DTO и возвращаем
         return adsMapper.toAdDto(savedAd);
     }
 
@@ -140,13 +145,8 @@ public class AdsServiceImpl implements AdsService {
 
     @Override
     public io.swagger.model.Ads getAdsMe() {
-        // Получаем текущего пользователя
         User user = getCurrentUser();
-        
-        // Находим все объявления пользователя
         List<Ads> userAds = adsRepository.findByAuthor(user);
-        
-        // Конвертируем в DTO и возвращаем
         return adsMapper.toAdsDto(userAds);
     }
 
@@ -262,39 +262,35 @@ public class AdsServiceImpl implements AdsService {
 
     @Override
     public Resource updateImage(Integer id, MultipartFile image) {
-        // Получаем текущего пользователя
         User currentUser = getCurrentUser();
-        
-        // Находим объявление по ID
         Ads ad = adsRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Advertisement not found"));
         
-        // Проверяем, что пользователь является автором объявления или администратором
-        if (!ad.getAuthor().getId().equals(currentUser.getId()) 
+        if (!ad.getAuthor().getId().equals(currentUser.getId())
                 && !currentUser.getRole().equals(User.Role.ADMIN)) {
             throw new SecurityException("You don't have permission to update this advertisement image");
         }
         
-        // Удаляем старое изображение
-        deleteImage(ad.getImage());
+//        deleteImage(ad.getImage());
         
-        // Сохраняем новое изображение
         String imagePath = saveImage(image);
         ad.setImage(imagePath);
         
-        // Сохраняем объявление с новым изображением
         adsRepository.save(ad);
         
-        // Возвращаем путь к изображению (в реальном приложении здесь должен быть код для возврата Resource)
-        // Для простоты возвращаем null, так как работа с Resource требует дополнительной настройки
-        return null;
+        try {
+            Path imagePathObj = Paths.get(imagePath.substring(1));
+            return new UrlResource(imagePathObj.toUri());
+        } catch (MalformedURLException e) {
+            throw new RuntimeException("Failed to create resource", e);
+        }
     }
 
-    // Вспомогательные методы
+    // Helper methods
     
     /**
-     * Получает текущего аутентифицированного пользователя
-     * @return User entity текущего пользователя
+     * Gets the currently authenticated user
+     * @return User entity of the current user
      */
     private User getCurrentUser() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
@@ -305,9 +301,9 @@ public class AdsServiceImpl implements AdsService {
     }
     
     /**
-     * Сохраняет изображение на диск
-     * @param image файл изображения
-     * @return путь к сохраненному изображению
+     * Saves image to disk
+     * @param image image file
+     * @return path to saved image
      */
     private String saveImage(MultipartFile image) {
         try {
@@ -332,8 +328,8 @@ public class AdsServiceImpl implements AdsService {
     }
     
     /**
-     * Удаляет изображение с диска
-     * @param imagePath путь к изображению
+     * Deletes image from disk
+     * @param imagePath path to image
      */
     private void deleteImage(String imagePath) {
         if (imagePath != null && !imagePath.isEmpty()) {
