@@ -1,9 +1,8 @@
 package ru.skypro.homework.mapper;
 
+import io.swagger.model.Comments;
 import org.springframework.stereotype.Component;
 import ru.skypro.homework.entity.Comment;
-
-import io.swagger.model.Comments;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -13,9 +12,10 @@ import java.util.stream.Collectors;
  */
 @Component
 public class CommentMapper {
-    
+
     /**
      * Converts Comment entity to Comment DTO
+     *
      * @param comment Comment entity
      * @return Comment DTO
      */
@@ -23,7 +23,7 @@ public class CommentMapper {
         if (comment == null) {
             return null;
         }
-        
+
         io.swagger.model.Comment commentDto = new io.swagger.model.Comment();
         commentDto.setPk(comment.getPk());
         commentDto.setText(comment.getText());
@@ -31,12 +31,13 @@ public class CommentMapper {
         commentDto.setAuthor(comment.getAuthor().getId());
         commentDto.setAuthorImage(comment.getAuthor().getImage());
         commentDto.setAuthorFirstName(comment.getAuthor().getFirstName());
-        
+
         return commentDto;
     }
-    
+
     /**
      * Converts list of Comment entities to Comments DTO
+     *
      * @param commentList list of Comment entities
      * @return Comments DTO
      */
@@ -44,13 +45,13 @@ public class CommentMapper {
         if (commentList == null) {
             return null;
         }
-        
+
         Comments commentsDto = new Comments();
         commentsDto.setCount(commentList.size());
         commentsDto.setResults(commentList.stream()
                 .map(this::toCommentDto)
                 .collect(Collectors.toList()));
-        
+
         return commentsDto;
     }
 }

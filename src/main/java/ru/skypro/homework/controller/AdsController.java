@@ -3,12 +3,11 @@ package ru.skypro.homework.controller;
 import io.swagger.model.*;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
-import org.springframework.security.core.Authentication;
 import ru.skypro.homework.service.AdsService;
 
 import java.io.IOException;
@@ -33,8 +32,9 @@ public class AdsController {
 
     /**
      * Add a new advertisement
+     *
      * @param properties Advertisement properties
-     * @param image Advertisement image
+     * @param image      Advertisement image
      * @return Created advertisement
      */
     @PostMapping("/ads")
@@ -52,7 +52,8 @@ public class AdsController {
 
     /**
      * Add a comment to advertisement
-     * @param id Advertisement ID
+     *
+     * @param id   Advertisement ID
      * @param body Comment data
      * @return Created comment
      */
@@ -68,7 +69,8 @@ public class AdsController {
 
     /**
      * Delete a comment
-     * @param adId Advertisement ID
+     *
+     * @param adId      Advertisement ID
      * @param commentId Comment ID
      * @return ResponseEntity with status
      */
@@ -87,6 +89,7 @@ public class AdsController {
 
     /**
      * Get information about advertisement
+     *
      * @param id Advertisement ID
      * @return Advertisement details
      */
@@ -98,6 +101,7 @@ public class AdsController {
 
     /**
      * Get advertisements of authenticated user
+     *
      * @return User's advertisements
      */
     @GetMapping("/ads/me")
@@ -108,6 +112,7 @@ public class AdsController {
 
     /**
      * Get all advertisements
+     *
      * @return All advertisements
      */
     @GetMapping("/ads")
@@ -118,6 +123,7 @@ public class AdsController {
 
     /**
      * Get comments of advertisement
+     *
      * @param id Advertisement ID
      * @return Comments of advertisement
      */
@@ -129,6 +135,7 @@ public class AdsController {
 
     /**
      * Delete advertisement
+     *
      * @param id Advertisement ID
      * @return ResponseEntity with status
      */
@@ -146,7 +153,8 @@ public class AdsController {
 
     /**
      * Update advertisement information
-     * @param id Advertisement ID
+     *
+     * @param id   Advertisement ID
      * @param body Advertisement data to update
      * @return Updated advertisement
      */
@@ -162,9 +170,10 @@ public class AdsController {
 
     /**
      * Update comment
-     * @param adId Advertisement ID
+     *
+     * @param adId      Advertisement ID
      * @param commentId Comment ID
-     * @param body Comment data to update
+     * @param body      Comment data to update
      * @return Updated comment
      */
     @PatchMapping("/ads/{adId}/comments/{commentId}")
@@ -180,7 +189,8 @@ public class AdsController {
 
     /**
      * Update advertisement image
-     * @param id Advertisement ID
+     *
+     * @param id    Advertisement ID
      * @param image New image
      * @return Updated image
      */
@@ -199,12 +209,12 @@ public class AdsController {
         try {
             Path imagePath = Paths.get("images", filename);
             Resource resource = new UrlResource(imagePath.toUri());
-            
+
             if (resource.exists()) {
                 String contentType = Files.probeContentType(imagePath);
                 return ResponseEntity.ok()
-                    .contentType(MediaType.parseMediaType(contentType))
-                    .body(resource);
+                        .contentType(MediaType.parseMediaType(contentType))
+                        .body(resource);
             } else {
                 return ResponseEntity.notFound().build();
             }

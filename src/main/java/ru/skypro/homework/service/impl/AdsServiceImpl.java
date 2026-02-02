@@ -27,14 +27,6 @@ import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.util.List;
 
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.time.LocalDateTime;
-import java.time.ZoneOffset;
-import java.util.List;
-
 @Service
 public class AdsServiceImpl implements AdsService {
 
@@ -48,12 +40,12 @@ public class AdsServiceImpl implements AdsService {
     private final UserMapper userMapper;
 
     public AdsServiceImpl(
-        AdsRepository adsRepository,
-        CommentRepository commentRepository,
-        UserRepository userRepository,
-        AdsMapper adsMapper,
-        CommentMapper commentMapper,
-        UserMapper userMapper
+            AdsRepository adsRepository,
+            CommentRepository commentRepository,
+            UserRepository userRepository,
+            AdsMapper adsMapper,
+            CommentMapper commentMapper,
+            UserMapper userMapper
     ) {
         this.adsRepository = adsRepository;
         this.commentRepository = commentRepository;
@@ -66,80 +58,67 @@ public class AdsServiceImpl implements AdsService {
     @Override
     public Ad addAd(CreateOrUpdateAd properties, MultipartFile image) {
         User user = getCurrentUser();
-        
+
         Ads ad = new Ads();
         ad.setTitle(properties.getTitle());
         ad.setPrice(properties.getPrice());
         ad.setDescription(properties.getDescription());
         ad.setAuthor(user);
-        
+
         String imagePath = saveImage(image);
         ad.setImage(imagePath);
-        
+
         Ads savedAd = adsRepository.save(ad);
-        
+
         return adsMapper.toAdDto(savedAd);
     }
 
     @Override
     public io.swagger.model.Comment addComment(Integer id, CreateOrUpdateComment body) {
-        // Получаем текущего пользователя
         User user = getCurrentUser();
-        
-        // Находим объявление по ID
+
         Ads ad = adsRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Advertisement not found"));
-        
-        // Создаем новый комментарий
+
         Comment comment = new Comment();
         comment.setText(body.getText());
         comment.setAuthor(user);
         comment.setAd(ad);
         comment.setCreatedAt(LocalDateTime.now().toEpochSecond(ZoneOffset.UTC));
-        
-        // Сохраняем комментарий в базе данных
+
         Comment savedComment = commentRepository.save(comment);
-        
-        // Конвертируем в DTO и возвращаем
+
         return commentMapper.toCommentDto(savedComment);
     }
 
     @Override
     public boolean deleteComment(Integer adId, Integer commentId) {
-        // Получаем текущего пользователя
         User currentUser = getCurrentUser();
-        
-        // Находим комментарий по ID и ID объявления
+
         Comment comment = commentRepository.findById(commentId)
                 .orElseThrow(() -> new IllegalArgumentException("Comment not found"));
-        
-        // Проверяем, что объявление существует
+
         Ads ad = adsRepository.findById(adId)
                 .orElseThrow(() -> new IllegalArgumentException("Advertisement not found"));
-        
-        // Проверяем, что комментарий принадлежит объявлению
+
         if (!comment.getAd().getPk().equals(adId)) {
             throw new IllegalArgumentException("Comment does not belong to this advertisement");
         }
-        
-        // Проверяем, что пользователь является автором комментария или администратором
-        if (!comment.getAuthor().getId().equals(currentUser.getId()) 
+
+        if (!comment.getAuthor().getId().equals(currentUser.getId())
                 && !currentUser.getRole().equals(User.Role.ADMIN)) {
             throw new SecurityException("You don't have permission to delete this comment");
         }
-        
-        // Удаляем комментарий
+
         commentRepository.delete(comment);
         return true;
     }
 
     @Override
     public ExtendedAd getAds(Integer id) {
-        // Находим объявление по ID
         Ads ad = adsRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Advertisement not found"));
-        
-        // Конвертируем в ExtendedAd DTO и возвращаем
+
         return adsMapper.toExtendedAdDto(ad);
     }
 
@@ -152,111 +131,86 @@ public class AdsServiceImpl implements AdsService {
 
     @Override
     public io.swagger.model.Ads getAllAds() {
-        // Получаем все объявления из базы данных
         List<Ads> allAds = adsRepository.findAll();
-        
-        // Конвертируем в DTO и возвращаем
+
         return adsMapper.toAdsDto(allAds);
     }
 
     @Override
     public Comments getComments(Integer id) {
-        // Находим объявление по ID
         Ads ad = adsRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Advertisement not found"));
-        
-        // Получаем все комментарии для объявления
+
         List<Comment> comments = commentRepository.findByAd(ad);
-        
-        // Конвертируем в DTO и возвращаем
+
         return commentMapper.toCommentsDto(comments);
     }
 
     @Override
     public boolean removeAd(Integer id) {
-        // Получаем текущего пользователя
         User currentUser = getCurrentUser();
-        
-        // Находим объявление по ID
+
         Ads ad = adsRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Advertisement not found"));
-        
-        // Проверяем, что пользователь является автором объявления или администратором
-        if (!ad.getAuthor().getId().equals(currentUser.getId()) 
+
+        if (!ad.getAuthor().getId().equals(currentUser.getId())
                 && !currentUser.getRole().equals(User.Role.ADMIN)) {
             throw new SecurityException("You don't have permission to delete this advertisement");
         }
-        
-        // Удаляем все комментарии объявления
+
         List<Comment> comments = commentRepository.findByAd(ad);
         commentRepository.deleteAll(comments);
-        
-        // Удаляем изображение объявления
+
         deleteImage(ad.getImage());
-        
-        // Удаляем объявление
+
         adsRepository.delete(ad);
         return true;
     }
 
     @Override
     public Ad updateAds(Integer id, CreateOrUpdateAd body) {
-        // Получаем текущего пользователя
         User currentUser = getCurrentUser();
-        
-        // Находим объявление по ID
+
         Ads ad = adsRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Advertisement not found"));
-        
-        // Проверяем, что пользователь является автором объявления или администратором
-        if (!ad.getAuthor().getId().equals(currentUser.getId()) 
+
+        if (!ad.getAuthor().getId().equals(currentUser.getId())
                 && !currentUser.getRole().equals(User.Role.ADMIN)) {
             throw new SecurityException("You don't have permission to update this advertisement");
         }
-        
-        // Обновляем свойства объявления
+
         ad.setTitle(body.getTitle());
         ad.setPrice(body.getPrice());
         ad.setDescription(body.getDescription());
-        
-        // Сохраняем обновленное объявление в базе данных
+
         Ads updatedAd = adsRepository.save(ad);
-        
-        // Конвертируем в DTO и возвращаем
+
         return adsMapper.toAdDto(updatedAd);
     }
 
     @Override
     public io.swagger.model.Comment updateComment(Integer adId, Integer commentId, CreateOrUpdateComment body) {
-        // Получаем текущего пользователя
         User currentUser = getCurrentUser();
-        
-        // Находим комментарий по ID
+
         Comment comment = commentRepository.findById(commentId)
                 .orElseThrow(() -> new IllegalArgumentException("Comment not found"));
-        
-        // Проверяем, что объявление существует
+
         Ads ad = adsRepository.findById(adId)
                 .orElseThrow(() -> new IllegalArgumentException("Advertisement not found"));
-        
-        // Проверяем, что комментарий принадлежит объявлению
+
         if (!comment.getAd().getPk().equals(adId)) {
             throw new IllegalArgumentException("Comment does not belong to this advertisement");
         }
-        
-        // Проверяем, что пользователь является автором комментария или администратором
-        if (!comment.getAuthor().getId().equals(currentUser.getId()) 
+
+        if (!comment.getAuthor().getId().equals(currentUser.getId())
                 && !currentUser.getRole().equals(User.Role.ADMIN)) {
             throw new SecurityException("You don't have permission to update this comment");
         }
-        
-        // Обновляем текст комментария
+
         comment.setText(body.getText());
-        
-        // Сохраняем обновленный комментарий в базе данных
+
         Comment updatedComment = commentRepository.save(comment);
-        
-        // Конвертируем в DTO и возвращаем
+
         return commentMapper.toCommentDto(updatedComment);
     }
 
@@ -265,19 +219,17 @@ public class AdsServiceImpl implements AdsService {
         User currentUser = getCurrentUser();
         Ads ad = adsRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Advertisement not found"));
-        
+
         if (!ad.getAuthor().getId().equals(currentUser.getId())
                 && !currentUser.getRole().equals(User.Role.ADMIN)) {
             throw new SecurityException("You don't have permission to update this advertisement image");
         }
-        
-//        deleteImage(ad.getImage());
-        
+
         String imagePath = saveImage(image);
         ad.setImage(imagePath);
-        
+
         adsRepository.save(ad);
-        
+
         try {
             Path imagePathObj = Paths.get(imagePath.substring(1));
             return new UrlResource(imagePathObj.toUri());
@@ -286,55 +238,52 @@ public class AdsServiceImpl implements AdsService {
         }
     }
 
-    // Helper methods
-    
     /**
-     * Gets the currently authenticated user
+     * Retrieves the currently authenticated user
+     *
      * @return User entity of the current user
      */
     private User getCurrentUser() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String username = authentication.getName();
-        
+
         return userRepository.findByEmail(username)
                 .orElseThrow(() -> new IllegalArgumentException("User not found"));
     }
-    
+
     /**
-     * Saves image to disk
-     * @param image image file
-     * @return path to saved image
+     * Saves image file to disk
+     *
+     * @param image image file to save
+     * @return path to the saved image
      */
     private String saveImage(MultipartFile image) {
         try {
-            // Создаем директорию для изображений, если она не существует
             Path uploadDir = Paths.get(IMAGES_DIR);
             if (!Files.exists(uploadDir)) {
                 Files.createDirectories(uploadDir);
             }
-            
-            // Генерируем уникальное имя файла
+
             String fileName = System.currentTimeMillis() + "_" + image.getOriginalFilename();
             Path filePath = uploadDir.resolve(fileName);
-            
-            // Сохраняем файл
+
             Files.copy(image.getInputStream(), filePath);
-            
-            // Возвращаем относительный путь
+
             return "/" + IMAGES_DIR + fileName;
         } catch (IOException e) {
             throw new RuntimeException("Failed to save image", e);
         }
     }
-    
+
     /**
-     * Deletes image from disk
-     * @param imagePath path to image
+     * Deletes image file from disk
+     *
+     * @param imagePath path to the image to delete
      */
     private void deleteImage(String imagePath) {
         if (imagePath != null && !imagePath.isEmpty()) {
             try {
-                Path imagePathObj = Paths.get(imagePath.substring(1)); // Убираем первый слеш
+                Path imagePathObj = Paths.get(imagePath.substring(1));
                 if (Files.exists(imagePathObj)) {
                     Files.delete(imagePathObj);
                 }

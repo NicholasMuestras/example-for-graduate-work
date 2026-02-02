@@ -15,10 +15,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 @RequiredArgsConstructor
 public class ApplicationConfig {
 
-    // UserDetailsService is now defined as a bean in CustomUserDetailsService
-    // Spring will automatically find and use it
-    // Standard implementation is replaced with custom one
-
     @Bean
     public AuthenticationProvider authenticationProvider(UserDetailsService userDetailsService) {
         DaoAuthenticationProvider authProvider = new DaoAuthenticationProvider();

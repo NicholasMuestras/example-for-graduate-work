@@ -25,7 +25,7 @@ import ru.skypro.homework.handler.CustomLogoutSuccessHandler;
 
 @Configuration
 @EnableWebSecurity
-@EnableGlobalMethodSecurity(prePostEnabled = true) // Для Spring Boot 2.x
+@EnableGlobalMethodSecurity(prePostEnabled = true)
 public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
     private final UserDetailsService userDetailsService;
@@ -56,7 +56,6 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                         .antMatchers("/api/admin/**").hasRole("ADMIN")
                         .anyRequest().authenticated()
                 )
-                // Включаем HTTP Basic аутентификацию для проверки заголовка Authorization
                 .httpBasic(basic -> basic
                         .authenticationEntryPoint((request, response, authException) -> {
                             response.setStatus(401);
@@ -68,7 +67,6 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                         .maximumSessions(1)
                         .maxSessionsPreventsLogin(false)
                         .sessionRegistry(sessionRegistry())
-//                        .sessionFixation().migrateSession()
                         .expiredUrl("/")
                 );
     }

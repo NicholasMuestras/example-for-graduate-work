@@ -54,7 +54,6 @@ public class AdsMapper {
         extendedAdDto.setDescription(ads.getDescription());
         extendedAdDto.setImage(ads.getImage());
         
-        // Fill author data
         extendedAdDto.setAuthorFirstName(author.getFirstName());
         extendedAdDto.setAuthorLastName(author.getLastName());
         extendedAdDto.setEmail(author.getEmail());
