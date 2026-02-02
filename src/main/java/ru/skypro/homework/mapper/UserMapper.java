@@ -3,15 +3,15 @@ package ru.skypro.homework.mapper;
 import org.springframework.stereotype.Component;
 import ru.skypro.homework.entity.User;
 
-
 /**
  * Mapper for converting between User entity and User DTO
  */
 @Component
 public class UserMapper {
-    
+
     /**
      * Converts User entity to UpdateUser DTO
+     *
      * @param user User entity
      * @return UpdateUser DTO
      */
@@ -30,6 +30,7 @@ public class UserMapper {
 
     /**
      * Converts User entity to User DTO
+     *
      * @param user User entity
      * @return User DTO
      */
@@ -37,7 +38,7 @@ public class UserMapper {
         if (user == null) {
             return null;
         }
-        
+
         io.swagger.model.User userDto = new io.swagger.model.User();
         userDto.setId(user.getId());
         userDto.setEmail(user.getEmail());
@@ -46,12 +47,13 @@ public class UserMapper {
         userDto.setPhone(user.getPhone());
         userDto.setRole(io.swagger.model.User.RoleEnum.valueOf(user.getRole().name()));
         userDto.setImage(user.getImage());
-        
+
         return userDto;
     }
-    
+
     /**
      * Converts User DTO to User entity
+     *
      * @param userDto User DTO
      * @return User entity
      */
@@ -59,7 +61,7 @@ public class UserMapper {
         if (userDto == null) {
             return null;
         }
-        
+
         User user = new User();
         user.setId(userDto.getId());
         user.setEmail(userDto.getEmail());
@@ -68,7 +70,7 @@ public class UserMapper {
         user.setPhone(userDto.getPhone());
         user.setRole(User.Role.valueOf(userDto.getRole().name()));
         user.setImage(userDto.getImage());
-        
+
         return user;
     }
 }

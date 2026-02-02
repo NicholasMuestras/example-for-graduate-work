@@ -22,23 +22,24 @@ public class CustomAuthenticationFailureHandler implements AuthenticationFailure
 
     private final ObjectMapper objectMapper;
 
+    /**
+     * Method for handling authentication failure.
+     */
     @Override
-    public void onAuthenticationFailure(HttpServletRequest request,
-                                      HttpServletResponse response,
-                                      AuthenticationException exception) throws IOException {
-        // Set response content type
+    public void onAuthenticationFailure(
+            HttpServletRequest request,
+            HttpServletResponse response,
+            AuthenticationException exception
+    ) throws IOException {
         response.setContentType("application/json");
         response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
 
-        // Log authentication failure
-        log.warn("Authentication failed for user {}: {}", 
-                request.getParameter("username"), exception.getMessage());
+        log.warn("Authentication failed for user {}: {}", request.getParameter("username"), exception.getMessage());
 
-        // Form JSON response
         String jsonResponse = objectMapper.writeValueAsString(
                 new LoginResponse(false, "Invalid credentials")
         );
-        
+
         response.getWriter().write(jsonResponse);
     }
 

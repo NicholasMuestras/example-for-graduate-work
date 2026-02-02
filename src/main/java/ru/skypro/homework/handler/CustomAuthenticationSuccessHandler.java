@@ -3,6 +3,7 @@ package ru.skypro.homework.handler;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 import org.springframework.stereotype.Component;
@@ -11,8 +12,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import java.io.IOException;
-
-import org.springframework.context.annotation.Lazy;
 
 /**
  * Handler for successful user authentication
@@ -24,26 +23,28 @@ public class CustomAuthenticationSuccessHandler implements AuthenticationSuccess
 
     private final ObjectMapper objectMapper;
 
+    /**
+     * Handles successful authentication
+     */
     @Override
-    public void onAuthenticationSuccess(HttpServletRequest request,
-                                      HttpServletResponse response,
-                                      Authentication authentication) throws IOException {
-        // Set response content type
+    public void onAuthenticationSuccess(
+            HttpServletRequest request,
+            HttpServletResponse response,
+            Authentication authentication
+    ) throws IOException {
         response.setContentType("application/json");
         response.setStatus(HttpServletResponse.SC_OK);
 
-        // Create session if it doesn't exist
         HttpSession session = request.getSession(true);
-        
-        // Log successful authentication
-        log.info("User {} successfully authenticated and session {} created", 
-                authentication.getName(), session.getId());
-
-        // Form JSON response
+        log.info(
+                "User {} successfully authenticated and session {} created",
+                authentication.getName(),
+                session.getId()
+        );
         String jsonResponse = objectMapper.writeValueAsString(
                 new LoginResponse(true, "Authentication successful")
         );
-        
+
         response.getWriter().write(jsonResponse);
     }
 

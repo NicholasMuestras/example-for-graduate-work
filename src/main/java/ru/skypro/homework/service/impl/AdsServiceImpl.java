@@ -27,14 +27,6 @@ import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.util.List;
 
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.time.LocalDateTime;
-import java.time.ZoneOffset;
-import java.util.List;
-
 @Service
 public class AdsServiceImpl implements AdsService {
 
@@ -48,12 +40,12 @@ public class AdsServiceImpl implements AdsService {
     private final UserMapper userMapper;
 
     public AdsServiceImpl(
-        AdsRepository adsRepository,
-        CommentRepository commentRepository,
-        UserRepository userRepository,
-        AdsMapper adsMapper,
-        CommentMapper commentMapper,
-        UserMapper userMapper
+            AdsRepository adsRepository,
+            CommentRepository commentRepository,
+            UserRepository userRepository,
+            AdsMapper adsMapper,
+            CommentMapper commentMapper,
+            UserMapper userMapper
     ) {
         this.adsRepository = adsRepository;
         this.commentRepository = commentRepository;
@@ -66,58 +58,58 @@ public class AdsServiceImpl implements AdsService {
     @Override
     public Ad addAd(CreateOrUpdateAd properties, MultipartFile image) {
         User user = getCurrentUser();
-        
+
         Ads ad = new Ads();
         ad.setTitle(properties.getTitle());
         ad.setPrice(properties.getPrice());
         ad.setDescription(properties.getDescription());
         ad.setAuthor(user);
-        
+
         String imagePath = saveImage(image);
         ad.setImage(imagePath);
-        
+
         Ads savedAd = adsRepository.save(ad);
-        
+
         return adsMapper.toAdDto(savedAd);
     }
 
     @Override
     public io.swagger.model.Comment addComment(Integer id, CreateOrUpdateComment body) {
         User user = getCurrentUser();
-        
+
         Ads ad = adsRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Advertisement not found"));
-        
+
         Comment comment = new Comment();
         comment.setText(body.getText());
         comment.setAuthor(user);
         comment.setAd(ad);
         comment.setCreatedAt(LocalDateTime.now().toEpochSecond(ZoneOffset.UTC));
-        
+
         Comment savedComment = commentRepository.save(comment);
-        
+
         return commentMapper.toCommentDto(savedComment);
     }
 
     @Override
     public boolean deleteComment(Integer adId, Integer commentId) {
         User currentUser = getCurrentUser();
-        
+
         Comment comment = commentRepository.findById(commentId)
                 .orElseThrow(() -> new IllegalArgumentException("Comment not found"));
-        
+
         Ads ad = adsRepository.findById(adId)
                 .orElseThrow(() -> new IllegalArgumentException("Advertisement not found"));
-        
+
         if (!comment.getAd().getPk().equals(adId)) {
             throw new IllegalArgumentException("Comment does not belong to this advertisement");
         }
-        
-        if (!comment.getAuthor().getId().equals(currentUser.getId()) 
+
+        if (!comment.getAuthor().getId().equals(currentUser.getId())
                 && !currentUser.getRole().equals(User.Role.ADMIN)) {
             throw new SecurityException("You don't have permission to delete this comment");
         }
-        
+
         commentRepository.delete(comment);
         return true;
     }
@@ -126,7 +118,7 @@ public class AdsServiceImpl implements AdsService {
     public ExtendedAd getAds(Integer id) {
         Ads ad = adsRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Advertisement not found"));
-        
+
         return adsMapper.toExtendedAdDto(ad);
     }
 
@@ -140,7 +132,7 @@ public class AdsServiceImpl implements AdsService {
     @Override
     public io.swagger.model.Ads getAllAds() {
         List<Ads> allAds = adsRepository.findAll();
-        
+
         return adsMapper.toAdsDto(allAds);
     }
 
@@ -148,29 +140,29 @@ public class AdsServiceImpl implements AdsService {
     public Comments getComments(Integer id) {
         Ads ad = adsRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Advertisement not found"));
-        
+
         List<Comment> comments = commentRepository.findByAd(ad);
-        
+
         return commentMapper.toCommentsDto(comments);
     }
 
     @Override
     public boolean removeAd(Integer id) {
         User currentUser = getCurrentUser();
-        
+
         Ads ad = adsRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Advertisement not found"));
-        
-        if (!ad.getAuthor().getId().equals(currentUser.getId()) 
+
+        if (!ad.getAuthor().getId().equals(currentUser.getId())
                 && !currentUser.getRole().equals(User.Role.ADMIN)) {
             throw new SecurityException("You don't have permission to delete this advertisement");
         }
-        
+
         List<Comment> comments = commentRepository.findByAd(ad);
         commentRepository.deleteAll(comments);
-        
+
         deleteImage(ad.getImage());
-        
+
         adsRepository.delete(ad);
         return true;
     }
@@ -178,47 +170,47 @@ public class AdsServiceImpl implements AdsService {
     @Override
     public Ad updateAds(Integer id, CreateOrUpdateAd body) {
         User currentUser = getCurrentUser();
-        
+
         Ads ad = adsRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Advertisement not found"));
-        
-        if (!ad.getAuthor().getId().equals(currentUser.getId()) 
+
+        if (!ad.getAuthor().getId().equals(currentUser.getId())
                 && !currentUser.getRole().equals(User.Role.ADMIN)) {
             throw new SecurityException("You don't have permission to update this advertisement");
         }
-        
+
         ad.setTitle(body.getTitle());
         ad.setPrice(body.getPrice());
         ad.setDescription(body.getDescription());
-        
+
         Ads updatedAd = adsRepository.save(ad);
-        
+
         return adsMapper.toAdDto(updatedAd);
     }
 
     @Override
     public io.swagger.model.Comment updateComment(Integer adId, Integer commentId, CreateOrUpdateComment body) {
         User currentUser = getCurrentUser();
-        
+
         Comment comment = commentRepository.findById(commentId)
                 .orElseThrow(() -> new IllegalArgumentException("Comment not found"));
-        
+
         Ads ad = adsRepository.findById(adId)
                 .orElseThrow(() -> new IllegalArgumentException("Advertisement not found"));
-        
+
         if (!comment.getAd().getPk().equals(adId)) {
             throw new IllegalArgumentException("Comment does not belong to this advertisement");
         }
-        
-        if (!comment.getAuthor().getId().equals(currentUser.getId()) 
+
+        if (!comment.getAuthor().getId().equals(currentUser.getId())
                 && !currentUser.getRole().equals(User.Role.ADMIN)) {
             throw new SecurityException("You don't have permission to update this comment");
         }
-        
+
         comment.setText(body.getText());
-        
+
         Comment updatedComment = commentRepository.save(comment);
-        
+
         return commentMapper.toCommentDto(updatedComment);
     }
 
@@ -227,17 +219,17 @@ public class AdsServiceImpl implements AdsService {
         User currentUser = getCurrentUser();
         Ads ad = adsRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Advertisement not found"));
-        
+
         if (!ad.getAuthor().getId().equals(currentUser.getId())
                 && !currentUser.getRole().equals(User.Role.ADMIN)) {
             throw new SecurityException("You don't have permission to update this advertisement image");
         }
-        
+
         String imagePath = saveImage(image);
         ad.setImage(imagePath);
-        
+
         adsRepository.save(ad);
-        
+
         try {
             Path imagePathObj = Paths.get(imagePath.substring(1));
             return new UrlResource(imagePathObj.toUri());
@@ -246,22 +238,22 @@ public class AdsServiceImpl implements AdsService {
         }
     }
 
-    // Helper methods
-    
     /**
      * Retrieves the currently authenticated user
+     *
      * @return User entity of the current user
      */
     private User getCurrentUser() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String username = authentication.getName();
-        
+
         return userRepository.findByEmail(username)
                 .orElseThrow(() -> new IllegalArgumentException("User not found"));
     }
-    
+
     /**
      * Saves image file to disk
+     *
      * @param image image file to save
      * @return path to the saved image
      */
@@ -271,20 +263,21 @@ public class AdsServiceImpl implements AdsService {
             if (!Files.exists(uploadDir)) {
                 Files.createDirectories(uploadDir);
             }
-            
+
             String fileName = System.currentTimeMillis() + "_" + image.getOriginalFilename();
             Path filePath = uploadDir.resolve(fileName);
-            
+
             Files.copy(image.getInputStream(), filePath);
-            
+
             return "/" + IMAGES_DIR + fileName;
         } catch (IOException e) {
             throw new RuntimeException("Failed to save image", e);
         }
     }
-    
+
     /**
      * Deletes image file from disk
+     *
      * @param imagePath path to the image to delete
      */
     private void deleteImage(String imagePath) {

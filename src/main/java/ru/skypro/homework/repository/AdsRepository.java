@@ -17,7 +17,7 @@ public interface AdsRepository extends JpaRepository<Ads, Integer> {
     List<Ads> findByAuthor(ru.skypro.homework.entity.User author);
     
     /**
-     * Find ads by title fragment (case insensitive)
+     * Find ads by title fragment (case-insensitive)
      * @param title title fragment
      * @return list of ads
      */

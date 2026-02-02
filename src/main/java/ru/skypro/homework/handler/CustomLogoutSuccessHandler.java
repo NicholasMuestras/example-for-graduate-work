@@ -24,33 +24,33 @@ public class CustomLogoutSuccessHandler implements LogoutSuccessHandler {
     private final ObjectMapper objectMapper;
 
     @Override
-    public void onLogoutSuccess(HttpServletRequest request,
-                              HttpServletResponse response,
-                              Authentication authentication) throws IOException {
-        // Set response content type
+    public void onLogoutSuccess(
+            HttpServletRequest request,
+            HttpServletResponse response,
+            Authentication authentication
+    ) throws IOException {
         response.setContentType("application/json");
         response.setStatus(HttpServletResponse.SC_OK);
 
-        // Get current session
         HttpSession session = request.getSession(false);
-        
-        // If session exists, invalidate it
+
         if (session != null) {
             String sessionId = session.getId();
             session.invalidate();
-            log.info("User {} successfully logged out and session {} invalidated", 
-                    authentication != null ? authentication.getName() : "unknown", 
-                    sessionId);
+            log.info(
+                    "User {} successfully logged out and session {} invalidated",
+                    authentication != null ? authentication.getName() : "unknown",
+                    sessionId
+            );
         } else {
-            log.info("Logout attempt for user {} without active session", 
+            log.info("Logout attempt for user {} without active session",
                     authentication != null ? authentication.getName() : "unknown");
         }
 
-        // Form JSON response
         String jsonResponse = objectMapper.writeValueAsString(
                 new LogoutResponse(true, "Logout successful")
         );
-        
+
         response.getWriter().write(jsonResponse);
     }
 

@@ -7,7 +7,6 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
-import ru.skypro.homework.entity.User;
 import ru.skypro.homework.repository.UserRepository;
 
 import java.util.Collections;
@@ -25,7 +24,7 @@ public class CustomUserDetailsService implements UserDetailsService {
     @Override
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
         log.info("Attempting to load user with email: {}", email);
-        
+
         return userRepository.findByEmail(email)
                 .map(this::createSpringUser)
                 .orElseThrow(() -> {
@@ -45,9 +44,9 @@ public class CustomUserDetailsService implements UserDetailsService {
         }
 
         var authority = new SimpleGrantedAuthority("ROLE_" + user.getRole().name());
-        
+
         log.info("User {} successfully loaded with role {}", user.getEmail(), user.getRole());
-        
+
         return org.springframework.security.core.userdetails.User.builder()
                 .username(user.getEmail())
                 .password(user.getPassword())

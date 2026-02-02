@@ -27,6 +27,7 @@ public class UsersController {
 
     /**
      * Get information about authenticated user
+     *
      * @return User information
      */
     @GetMapping("/me")
@@ -36,11 +37,11 @@ public class UsersController {
     }
 
     /**
-     * Update password for authenticated user
+     * Update password for authenticated user.
+     *
      * @param newPassword New password data
      * @return ResponseEntity with status
      */
-
     @PatchMapping("/set_password")
     @PostMapping("/set_password")
     public ResponseEntity<Void> setPassword(@RequestBody NewPassword newPassword) {
@@ -50,6 +51,7 @@ public class UsersController {
 
     /**
      * Update information about authenticated user
+     *
      * @param updateUser User data to update
      * @return Updated user information
      */
@@ -61,6 +63,7 @@ public class UsersController {
 
     /**
      * Update avatar for authenticated user
+     *
      * @param image New avatar image
      * @return ResponseEntity with status
      */
