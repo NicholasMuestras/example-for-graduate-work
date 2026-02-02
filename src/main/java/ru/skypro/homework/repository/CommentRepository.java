@@ -10,32 +10,32 @@ import java.util.List;
 public interface CommentRepository extends JpaRepository<Comment, Integer> {
     
     /**
-     * Найти все комментарии по объявлению
-     * @param ad объявление
-     * @return список комментариев объявления
+     * Find all comments by ad
+     * @param ad advertisement
+     * @return list of ad's comments
      */
     List<Comment> findByAd(ru.skypro.homework.entity.Ads ad);
     
     /**
-     * Найти комментарии по автору
-     * @param author автор комментариев
-     * @return список комментариев автора
+     * Find comments by author
+     * @param author comments author
+     * @return list of author's comments
      */
     List<Comment> findByAuthor(ru.skypro.homework.entity.User author);
     
     /**
-     * Найти комментарии по автору и объявлению
-     * @param author автор комментария
-     * @param ad объявление
-     * @return список комментариев
+     * Find comments by author and ad
+     * @param author comment author
+     * @param ad advertisement
+     * @return list of comments
      */
     List<Comment> findByAuthorAndAd(ru.skypro.homework.entity.User author, ru.skypro.homework.entity.Ads ad);
     
     /**
-     * Проверить существование комментария по автору и объявлению
-     * @param author автор комментария
-     * @param ad объявление
-     * @return true если комментарий существует
+     * Check if comment exists by author and ad
+     * @param author comment author
+     * @param ad advertisement
+     * @return true if comment exists
      */
     boolean existsByAuthorAndAd(ru.skypro.homework.entity.User author, ru.skypro.homework.entity.Ads ad);
 }

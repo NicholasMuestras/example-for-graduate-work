@@ -10,24 +10,24 @@ import java.util.List;
 public interface AdsRepository extends JpaRepository<Ads, Integer> {
     
     /**
-     * Найти все объявления по автору
-     * @param author автор объявлений
-     * @return список объявлений автора
+     * Find all ads by author
+     * @param author ads author
+     * @return list of author's ads
      */
     List<Ads> findByAuthor(ru.skypro.homework.entity.User author);
     
     /**
-     * Найти объявления по фрагменту заголовка (игнорируя регистр)
-     * @param title фрагмент заголовка
-     * @return список объявлений
+     * Find ads by title fragment (case insensitive)
+     * @param title title fragment
+     * @return list of ads
      */
     List<Ads> findByTitleContainingIgnoreCase(String title);
     
     /**
-     * Найти объявления в диапазоне цен
-     * @param minPrice минимальная цена
-     * @param maxPrice максимальная цена
-     * @return список объявлений
+     * Find ads in price range
+     * @param minPrice minimum price
+     * @param maxPrice maximum price
+     * @return list of ads
      */
     List<Ads> findByPriceBetween(int minPrice, int maxPrice);
 }
